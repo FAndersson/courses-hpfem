@@ -1,0 +1,67 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{doi}
+
+\begin{document}
+
+\title{The wave equation}
+\maketitle
+
+\begin{abstract}
+\noindent
+This document deals with the basics of solving the wave equation using the
+finite element method.
+\end{abstract}
+
+\section{Derivation of the wave equation for vibrations in a string}
+Let $u$ be the displacement of an elastic string. From Hooke's law we have that
+the restoring force is proportional to the strain in the string.
+\[
+f = -k \nabla u
+\]
+By Newton's law the acceleration of the center of mass of a section $V$ of the
+string is proportional to the total force acting on the section
+\[
+\ddot{u} \int_V \rho \, dV = - \int_{\partial V} f \cdot n \, dS
+= - \int_{\partial V} -k \nabla u \cdot n \, dS
+= k \int_{V} \nabla \cdot \nabla u \, dV
+= k \int_V \Delta u \, dV
+\]
+where we have assumed a homogeneous stiffness $k$ in the string. Since the
+equation should hold for any $V$ we get
+\[
+\ddot{u} = \frac{k}{\rho} \Delta u = \frac{E}{\rho} \Delta u.
+\]
+
+\section{Finite element formulation}
+First we split the equation into two first order equations in time
+\[
+\dot{u} = v,
+\]
+\[
+\dot{v} = a^2 \Delta u.
+\]
+A variational form of this equation is given by multiplying with two test
+functions $p, q$ and integrating over the entire string.
+\[
+\int_{\Omega} (\dot{u} - v) p \, dV = 0,
+\]
+\[
+\int_{\Omega} (\dot{v} - a^2 \Delta u) q \, dV = 0.
+\]
+Assuming $q = 0$ on the boundary
+\[
+\int_{\Omega} (\dot{v} q + a^2 \nabla u \cdot \nabla q \, dV = 0.
+\]
+Next we discretize the equation in time using the Crank-Nicolson method
+\[
+\int_{\Omega} (\frac{u_{i + 1} - u_i}{\Delta t} - \frac{1}{2} \left( v_{i + 1} + v_i \right)) p \, dV = 0,
+\]
+\[
+\int_{\Omega} (\frac{v_{i + 1} - v_i}{\Delta t} q + a^2 \frac{\nabla (u_{i + 1} - u_i)}{2} \cdot \nabla q \, dV = 0.
+\]
+
+\end{document}

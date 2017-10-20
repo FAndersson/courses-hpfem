@@ -1,0 +1,57 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{doi}
+
+\begin{document}
+
+\title{The heat equation}
+\maketitle
+
+\begin{abstract}
+\noindent
+This document deals with the basics of solving the heat equation using the
+finite element method.
+\end{abstract}
+
+\section{Derivation of the heat equation}
+Let $u$ be the temperature field in a solid $\Omega$. The heat flow $q$ in the
+solid is given by
+\[
+q = -k \nabla u,
+\]
+where $k$ is the thermal conductivity in the solid. The change of temperature
+in a volume $V \subset \Omega$ is given by the heat production inside the volume
+minus the flow of heat out of the volume
+\[
+\frac{d}{dt} \int_V u \, dV
+= \int_V f \, dV -\int_{\partial V} q \cdot n \, dS + \int
+= \int_V f \, dV - \int_V \nabla \cdot q \, dV
+= \int_V f + k \Delta u \, dV
+\]
+where we have assumed a homogeneous thermal conductivity in the last step. Since
+this equation should hold for any $V$ we get
+\begin{equation} \label{eq:heat_equation}
+\frac{du}{dt} - \Delta u = f.
+\end{equation}
+
+\section{Finite element formulation}
+First we discretize \eqref{eq:heat_equation} in time using the implicit Euler
+method (assuming $f = 0$)
+\begin{equation} \label{eq:heat_eqn_discretized_in_time}
+\frac{u_{i + 1} - u_i}{\Delta t} - k \Delta u_{i + 1} = 0.
+\end{equation}
+Multiplying \eqref{eq:heat_eqn_discretized_in_time} with a test function $v$ and
+integrating over $\Omega$ we get
+\[
+\int_{\Omega} \frac{u_{i + 1} - u_i}{\Delta t} \cdot v - k \Delta u_{i + 1} \cdot v \, dV = 0.
+\]
+Using Green's first identity and assuming that $v$ is zero on $\partial \Omega$
+we have
+\[
+\int_{\Omega} (u_{i + 1} - u_i) \cdot v + k \Delta t \nabla u_{i + 1} \cdot \nabla v \, dV = 0.
+\]
+
+\end{document}
