@@ -7,7 +7,8 @@ from dolfin.fem import DirichletBC
 from dolfin.fem.norms import errornorm
 from dolfin.fem.projection import project
 from dolfin.fem.solving import solve
-from dolfin.functions import FunctionSpace, VectorFunctionSpace, TestFunctions, TrialFunction, TrialFunctions, Expression, CellSize
+from dolfin.functions import (
+    FunctionSpace, VectorFunctionSpace, TestFunctions, TrialFunction, TrialFunctions, Expression, CellSize)
 from mshr import Rectangle, generate_mesh
 from ufl import dx, inner, grad
 
@@ -35,7 +36,6 @@ def solve_wave_equation(a, symmetric=True):
     :param symmetric: Whether or not the problem is symmetric
     """
     mesh, boundary = setup_geometry()
-    h = CellSize(mesh)
 
     # Exact solution
     if symmetric:
@@ -79,7 +79,7 @@ def solve_wave_equation(a, symmetric=True):
         um = 0.5 * (u + u0)
         vm = 0.5 * (v + v0)
         a1 = (u - u0) / time_step * p * dx - vm * p * dx
-        a2 = (v - v0) / time_step * q * dx + a ** 2 * inner(grad(um), grad(q)) * dx
+        a2 = (v - v0) / time_step * q * dx + a**2 * inner(grad(um), grad(q)) * dx
 
         # Solve the wave equation (one time step)
         solve(a1 + a2 == 0, w, bcs)
