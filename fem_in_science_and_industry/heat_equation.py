@@ -34,7 +34,7 @@ def solve_heat_equation(k):
     """
     mesh, boundary = setup_geometry()
     
-     # Exact solution (Gauss curve)
+    # Exact solution (Gauss curve)
     ue = Expression("exp(-(x[0]*x[0]+x[1]*x[1])/(4*a*t))/(4*pi*a*t)", a=k, t=1e-7, domain=mesh, degree=2)
     
     # Polynomial degree
@@ -62,7 +62,7 @@ def solve_heat_equation(k):
         # Weak form of the heat equation
         a = (u - u0) / time_step * v * dx + k * inner(grad(u), grad(v)) * dx
         
-        # Solve the Heat equation (one time step)
+        # Solve the heat equation (one time step)
         solve(a == 0, u, bc)
         
         # Advance time in exact solution
