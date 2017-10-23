@@ -1,0 +1,71 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{doi}
+
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\sym}{sym}
+
+\begin{document}
+
+\title{The Navier-Stokes equation}
+\maketitle
+
+\begin{abstract}
+\noindent
+This document deals with the basics of solving the Navier-Stokes equation using
+the finite element method.
+\end{abstract}
+
+\section{Derivation of the Navier-Stokes equation}
+Let $u$ denote the velocity field in a fluid. From Cauchy's momentum equation we
+have
+\[
+\frac{d}{dt} (\rho u) = \nabla \cdot \sigma + \rho g.
+\]
+Assuming $\rho$ is constant in time we get
+\begin{equation} \label{eq:cauchys_momentum_equation}
+\rho (\dot{u} + \nabla u \cdot u) = \nabla \cdot \sigma + \rho g,
+\end{equation}
+where $\dot{u} = \frac{\partial u}{\partial t}$. Now we use the Constitutive
+model
+\[
+\sigma = -p I + d.
+\]
+Generally pressure is defined as
+\[
+p = -\frac{1}{3} \tr \sigma,
+\]
+so the tensor $d$ need to satisfy $\tr d = 0$. Assuming that $d$ is proportional
+to $\varepsilon = \sym \nabla u$, and assuming an isotropic material we have
+\[
+d_{ij} = \lambda \delta_{ij} \varepsilon_{kk} + 2 \mu \varepsilon_{ij}.  
+\]
+Taking the $\tr d = 0$ equation into account we find $3 \lambda + 2 \mu = 0$,
+i.e.
+\[
+d_{ij} = 2 \mu \left( \varepsilon_{ij} - \frac{1}{3} \delta_{ij} \varepsilon_{kk} \right).
+\]
+Plugging this into \eqref{eq:cauchys_momentum_equation} we get
+\[
+\rho (\dot{u} + \nabla u \cdot u) 
+= -\nabla p 
++ \mu \left( \Delta u + \frac{1}{3} \nabla (\nabla \cdot u) \right) 
++ \rho g,
+\]
+which is Navier-Stokes equation. For an incompressible fluid we have
+\[
+\int_{\partial V} u \cdot n \, dS = \int_V \nabla \cdot u \, dV = 0,
+\]
+for any volume $V$ in the fluid, i.e. $\nabla \cdot u = 0$. So the
+incompressible Navier-Stokes equation is
+\[
+\rho (\dot{u} + \nabla u \cdot u) 
+= -\nabla p 
++ \mu \Delta u
++ \rho g.
+\]
+
+\end{document}
