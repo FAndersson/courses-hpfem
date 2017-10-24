@@ -1,16 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from dolfin import Point
+from dolfin import Point, cells, facets, MeshFunction, SubDomain
 from dolfin.common.plotting import plot
 from dolfin.fem import DirichletBC
 from dolfin.fem.norms import errornorm
 from dolfin.fem.projection import project
 from dolfin.fem.solving import solve
+from dolfin.fem.assembling import assemble
 from dolfin.functions import (
-    FunctionSpace, VectorFunctionSpace, TestFunction, Function, TrialFunctions, Expression, CellSize)
+    FunctionSpace, VectorFunctionSpace, TestFunction, Function, TrialFunctions, Expression, CellSize, FacetNormal)
 from mshr import Circle, Rectangle, generate_mesh
-from ufl import dx, ds, inner, grad, div, VectorElement, FiniteElement
+from ufl import dx, ds, inner, grad, div, VectorElement, FiniteElement, Measure
 
 
 def setup_geometry():
@@ -31,14 +32,33 @@ def setup_geometry():
     # Part of the boundary with zero velocity
     nm = Expression("x[0] > XMIN + eps && x[0] < XMAX - eps ? 1. : 0.", XMIN=xmin, XMAX=xmax, eps=eps, degree=1)
 
-    return mesh, om, im, nm, ymax
+    # Define interior boundary
+    class InteriorBoundary(SubDomain):
+        def inside(self, x, on_boundary):
+            # Circle midpoint and radius
+            xc = [0.5, 0.5]
+            r = 0.1
+            # Compute squared distance to circle midpoint
+            d2 = (x[0] - xc[0])**2 + (x[1] - xc[1])**2
+            return on_boundary and d2 < (2 * r)**2
+
+    # Create mesh function over the cell facets
+    sub_domains = MeshFunction("size_t", mesh, mesh.topology().dim() - 1)
+    # Mark all facets as sub domain 0
+    sub_domains.set_all(0)
+    # Mark interior boundary facets as sub domain 1
+    interior_boundary = InteriorBoundary()
+    interior_boundary.mark(sub_domains, 1)
+
+    return mesh, om, im, nm, ymax, sub_domains
 
 
 def solve_navier_stokes_equation():
     """
     Solve the Navier-Stokes equation on a hard-coded mesh with hard-coded initial and boundary conditions
     """
-    mesh, om, im, nm, ymax = setup_geometry()
+    mesh, om, im, nm, ymax, sub_domains = setup_geometry()
+    dsi = Measure("ds", domain=mesh, subdomain_data=sub_domains)
 
     # Setup FEM function spaces
     # Function space for the velocity
@@ -96,6 +116,12 @@ def solve_navier_stokes_equation():
             fig = plt.figure()
             plot(nov, fig=fig)
             plt.show()
+
+            # Compute drag force on circle
+            n = FacetNormal(mesh)
+            drag_force_measure = p * n[0] * dsi(1)  # Drag (only pressure)
+            drag_force = assemble(drag_force_measure)
+            print("Drag force = " + str(drag_force))
 
         # Shift to next time step
         t += time_step
