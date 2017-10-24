@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from dolfin import Point, cells, facets, MeshFunction, SubDomain
+from dolfin import Point, cells, facets, refine, MeshFunction, SubDomain
 from dolfin.common.plotting import plot
 from dolfin.fem import DirichletBC
 from dolfin.fem.norms import errornorm
@@ -14,14 +14,29 @@ from mshr import Circle, Rectangle, generate_mesh
 from ufl import dx, ds, inner, grad, div, VectorElement, FiniteElement, Measure
 
 
-def setup_geometry():
+def setup_geometry(interior_circle=True, num_mesh_refinements=0):
     # Generate mesh
     xmin, xmax = 0.0, 4.0
     ymin, ymax = 0.0, 1.0
-    mesh_resolution = 30
+    mesh_resolution = 50
     geometry1 = Rectangle(Point(xmin, ymin), Point(xmax, ymax))
-    geometry2 = Circle(Point(0.5, 0.5), 0.1)
+    center = Point(0.5, 0.5)
+    r = 0.1
+    side_length = 0.1
+    if interior_circle:
+        geometry2 = Circle(center, r)
+    else:
+        l2 = side_length / 2
+        geometry2 = Rectangle(Point(center[0] - l2, center[1] - l2), Point(center[0] + l2, center[1] + l2))
     mesh = generate_mesh(geometry1 - geometry2, mesh_resolution)
+
+    # Refine mesh around the interior boundary
+    for i in range(0, num_mesh_refinements):
+        cell_markers = MeshFunction("bool", mesh, mesh.topology().dim())
+        for c in cells(mesh):
+            p = c.midpoint()
+            cell_markers[c] = (abs(p[0] - .5) < .5 and abs(p[1] - .5) < .3 and c.h() > .1) or c.h() > .2
+        mesh = refine(mesh, cell_markers)
 
     # Mark regions for boundary conditions
     eps = 1e-5
@@ -35,11 +50,8 @@ def setup_geometry():
     # Define interior boundary
     class InteriorBoundary(SubDomain):
         def inside(self, x, on_boundary):
-            # Circle midpoint and radius
-            xc = [0.5, 0.5]
-            r = 0.1
-            # Compute squared distance to circle midpoint
-            d2 = (x[0] - xc[0])**2 + (x[1] - xc[1])**2
+            # Compute squared distance to interior object midpoint
+            d2 = (x[0] - center[0])**2 + (x[1] - center[1])**2
             return on_boundary and d2 < (2 * r)**2
 
     # Create mesh function over the cell facets
@@ -53,11 +65,11 @@ def setup_geometry():
     return mesh, om, im, nm, ymax, sub_domains
 
 
-def solve_navier_stokes_equation():
+def solve_navier_stokes_equation(interior_circle=True, num_mesh_refinements=0):
     """
     Solve the Navier-Stokes equation on a hard-coded mesh with hard-coded initial and boundary conditions
     """
-    mesh, om, im, nm, ymax, sub_domains = setup_geometry()
+    mesh, om, im, nm, ymax, sub_domains = setup_geometry(interior_circle, num_mesh_refinements)
     dsi = Measure("ds", domain=mesh, subdomain_data=sub_domains)
 
     # Setup FEM function spaces
