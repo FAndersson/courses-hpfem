@@ -6,9 +6,10 @@ from dolfin.fem import DirichletBC
 from dolfin.fem.norms import errornorm
 from dolfin.fem.projection import project
 from dolfin.fem.solving import solve
+from dolfin.fem.assembling import assemble
 from dolfin.functions import FunctionSpace, TestFunction, Function, Expression
 from mshr import Rectangle, generate_mesh
-from ufl import dx, inner, grad
+from ufl import dx, inner, grad, sqrt
 
 
 def setup_geometry():
@@ -77,6 +78,8 @@ def solve_heat_equation(k):
             
             # Compute error in L2 norm
             error_L2 = errornorm(ue, u, 'L2')
+            # or equivalently
+            # sqrt(assemble((ue - u) * (ue - u) * dx))
             # Print error
             print(error_L2)
         
