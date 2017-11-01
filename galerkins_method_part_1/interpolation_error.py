@@ -31,7 +31,7 @@ def compute_interpolation_error(mesh_resolution=20):
     for i in range(len(x)):
         Eua[i] = 1 + x[i] * math.sin(10 * x[i])
 
-    # Compute max interpolation error
+    # Compute max interpolation error in the nodes
     e = Eua - Iua
     e_abs = np.absolute(e)
     error = np.amax(e_abs)
