@@ -94,6 +94,9 @@ def s_increase_when_mres_decrease():
 
 
 def p_order_1_3():
+    import logging
+    logging.getLogger('FFC').setLevel(logging.WARNING)
+
     s1 = compute_projection_error(10, 1)
     s3 = compute_projection_error(10, 3)
 
@@ -104,3 +107,7 @@ def p_order_1_3():
     print(s3)
     print(s1_2)
     print(s3_2)
+
+
+if __name__ == "__main__":
+    p_order_1_3()
