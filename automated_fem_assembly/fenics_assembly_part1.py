@@ -1,4 +1,9 @@
-from dolfin import UnitSquareMesh
+import numpy as np
+
+from dolfin import UnitSquareMesh, cells, Vertex
+from dolfin.fem.assembling import assemble_system
+from dolfin.functions import Constant, FunctionSpace, TrialFunction, TestFunction
+from ufl import inner, grad, dx
 
 
 def myassemble(mesh):
@@ -69,6 +74,7 @@ def myassemble(mesh):
 
                     # Assemble matrix (bilinear form)
                     integral = (np.inner(du, dv)) * dx / 3.0
+                    integral += u * v * dx / 3.0
                     A[nodes[i], nodes[j]] += integral
 
     return A, b
@@ -81,3 +87,26 @@ def assemble_example():
     A, b = myassemble(mesh)
 
     print("The norm of A is {}".format(np.linalg.norm(A)))
+
+
+def assemble_matrices_own_functions():
+    import scipy as sp
+
+    from finite_element.laplace_equation import assemble
+    from finite_element.projection import assemble_lhs
+    from geometry.mesh.basic_triangulations import rectangle_triangulation, rectangle_vertices
+
+    n = 6
+    triangles = rectangle_triangulation(n, n)
+    vertices = rectangle_vertices(1, 1, n, n)[:, 0:2]
+    r = 1
+    A1 = assemble(triangles, vertices, r)
+    A2 = assemble_lhs(triangles, vertices, r)
+    A = A1 + A2
+
+    print("The norm of A is {}".format(sp.sparse.linalg.norm(A)))
+
+
+if __name__ == "__main__":
+    # assemble_example()
+    assemble_matrices_own_functions()
