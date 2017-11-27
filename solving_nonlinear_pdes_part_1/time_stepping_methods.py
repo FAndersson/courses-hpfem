@@ -53,7 +53,7 @@ def solve_heat_equation(k, time_stepping_method):
     u = Function(V)
 
     # Time parameters
-    time_step = 0.5
+    time_step = 0.05
     t_start, t_end = 0.0, 20.0
 
     # Time stepping
