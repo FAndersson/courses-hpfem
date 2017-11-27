@@ -53,7 +53,7 @@ def solve_heat_equation(k, time_stepping_method):
     u = Function(V)
 
     # Time parameters
-    time_step = 0.05
+    time_step = 0.001
     t_start, t_end = 0.0, 20.0
 
     # Time stepping
@@ -80,14 +80,15 @@ def solve_heat_equation(k, time_stepping_method):
         t += time_step
         ue.t = t
 
-        # Compute error in L2 norm
-        error_L2 = errornorm(ue, u, 'L2')
-        # or equivalently
-        # sqrt(assemble((ue - u) * (ue - u) * dx))
-        # Compute norm of exact solution
-        nue = norm(ue)
-        # Print relative error
-        print("Relative error = {}".format(error_L2 / nue))
+        if step % 100 == 0:
+            # Compute error in L2 norm
+            error_L2 = errornorm(ue, u, 'L2')
+            # or equivalently
+            # sqrt(assemble((ue - u) * (ue - u) * dx))
+            # Compute norm of exact solution
+            nue = norm(ue)
+            # Print relative error
+            print("Relative error = {}".format(error_L2 / nue))
 
         # Shift to next time step
         u0 = project(u, V)
